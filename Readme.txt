@@ -22,6 +22,17 @@ Upload the ZIP file and click "Install Now."
 Activate the plugin after installation.
 
 
+- Goto Plugin File Editor 
+-Edit 
+directorist/templates/single-reviews.php (active)
+
+add this line on line number  11
+if (function_exists('display_endorsement_categories')) {
+                display_endorsement_categories(get_the_ID());
+            }
+
+
+
 
 Configuration
 No additional configuration required: The plugin adds endorsement categories to the directory listings automatically upon activation.
