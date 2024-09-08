@@ -34,8 +34,8 @@ function update_endorsement() {
     $user_vote_key = $listing_id . '_' . $category;
     $has_voted = in_array($user_vote_key, $user_votes);
 
-    error_log("User Votes: " . print_r($user_votes, true));
-    error_log("User Vote Key: $user_vote_key, Has Voted: " . ($has_voted ? 'Yes' : 'No'));
+    //error_log("User Votes: " . print_r($user_votes, true));
+   // error_log("User Vote Key: $user_vote_key, Has Voted: " . ($has_voted ? 'Yes' : 'No'));
 
     if ($has_voted && $voteChange == 1) {
         wp_send_json_error(['message' => 'You have already voted for this category.']);
@@ -47,12 +47,12 @@ function update_endorsement() {
     $current_votes = get_post_meta($listing_id, 'endorsement_' . $category, true);
     $current_votes = $current_votes ? intval($current_votes) : 0;
 
-    error_log("Current Votes: $current_votes");
+  //  error_log("Current Votes: $current_votes");
 
     // Update the vote count
     $new_votes = max(0, $current_votes + $voteChange);
 
-    error_log("New Votes: $new_votes");
+  //  error_log("New Votes: $new_votes");
 
     // Save the new vote count back to the database
     update_post_meta($listing_id, 'endorsement_' . $category, $new_votes);
@@ -294,7 +294,7 @@ function add_endorsement_categories_to_directory_listings($content) {
 }
 
 
-
+//shows the dasboard on wordpress panel 
 function wpmax_endorsements_add_admin_menu() {
     add_menu_page(
         'Endorsement Dashboard',
@@ -307,6 +307,8 @@ function wpmax_endorsements_add_admin_menu() {
     );
 }
 
+
+//work on the functionality of endorse on dashboard side . 
 function wpmax_endorsements_dashboard_page() {
     // Fetch all directory listings
     $listings = get_posts([
@@ -319,8 +321,34 @@ function wpmax_endorsements_dashboard_page() {
         'coaching' => 'Coaching',
         'facilities' => 'Facilities',
         'communication' => 'Communication',
-        'Value for Money' => 'Value for Money',
+        'value_for_money' => 'Value for Money',  // Fixed key for consistency
     ];
+
+    // Create an array to hold listings and their total votes
+    $listings_with_votes = [];
+
+    foreach ($listings as $listing) {
+        $total_votes = 0;
+        foreach ($categories as $category_key => $category_name) {
+            // Retrieve the current vote count for each category
+            $meta_key = 'endorsement_' . $category_key;
+            $current_votes = get_post_meta($listing->ID, $meta_key, true);
+            $current_votes = $current_votes ? intval($current_votes) : 0;
+            $total_votes += $current_votes; // Add to the total vote count
+        }
+
+        // Store the listing with its total votes
+        $listings_with_votes[] = [
+            'listing' => $listing,
+            'total_votes' => $total_votes
+        ];
+    }
+
+    // Sort listings by total votes in descending order
+    usort($listings_with_votes, function($a, $b) {
+        return $b['total_votes'] <=> $a['total_votes'];
+    });
+
     ?>
     <div class="wrap">
         <h1>Endorsement Dashboard</h1>
@@ -334,42 +362,32 @@ function wpmax_endorsements_dashboard_page() {
                 </tr>
             </thead>
             <tbody>
-                <?php if (empty($listings)): ?>
+                <?php if (empty($listings_with_votes)): ?>
                     <tr>
                         <td colspan="<?php echo count($categories) + 1; ?>">No listings found.</td>
                     </tr>
                 <?php else: ?>
-                   <?php foreach ($listings as $listing): ?>
-					<?php 
-						$hasValue = false;
-						foreach ($categories as $category_key => $category_name): 
-							// Retrieve the current vote count for each category
-							$meta_key = 'endorsement_' . $category_key;
-							$current_votes = get_post_meta($listing->ID, $meta_key, true);
-							$current_votes = $current_votes ? intval($current_votes) : 0;
-
-							if($current_votes > 0){
-								$hasValue = true;
-								break; // Exit the loop if a value greater than 0 is found
-							}
-						endforeach;
-					?>
-					<?php if ($hasValue): ?>
-						<tr>
-														<td>
-						<a href="<?php echo get_permalink($listing->ID); ?>"><?php echo esc_html($listing->post_title); ?></a></td>
-							<?php foreach ($categories as $category_key => $category_name): 
-								// Retrieve the current vote count for each category
-								$meta_key = 'endorsement_' . $category_key;
-								$current_votes = get_post_meta($listing->ID, $meta_key, true);
-								$current_votes = $current_votes ? intval($current_votes) : 0;
-            ?>
-                <td><?php echo intval($current_votes); ?></td>
-            <?php endforeach; ?>
-        </tr>
-    <?php endif; ?>
-<?php endforeach; ?>
-
+                    <?php foreach ($listings_with_votes as $listing_data): ?>
+                        <?php 
+                            $listing = $listing_data['listing'];
+                            $hasValue = $listing_data['total_votes'] > 0;
+                        ?>
+                        <?php if ($hasValue): ?>
+                            <tr>
+                                <td>
+                                    <a href="<?php echo get_permalink($listing->ID); ?>"><?php echo esc_html($listing->post_title); ?></a>
+                                </td>
+                                <?php foreach ($categories as $category_key => $category_name): 
+                                    // Retrieve the current vote count for each category
+                                    $meta_key = 'endorsement_' . $category_key;
+                                    $current_votes = get_post_meta($listing->ID, $meta_key, true);
+                                    $current_votes = $current_votes ? intval($current_votes) : 0;
+                                ?>
+                                    <td><?php echo intval($current_votes); ?></td>
+                                <?php endforeach; ?>
+                            </tr>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
                 <?php endif; ?>
             </tbody>
         </table>
@@ -390,6 +408,8 @@ function wpmax_endorsements_dashboard_page() {
     </style>
     <?php
 }
+
+
 
 
 add_action('admin_menu', 'wpmax_endorsements_add_admin_menu');
