@@ -32,7 +32,12 @@ if (function_exists('display_endorsement_categories')) {
             }
 
 
+- Goto Theme File editor 
 
+- Make sure to add this line at the bottom /must be line 74 :)  
+
+// Function to output endorsement categories
+add_filter('the_content', 'add_endorsement_categories_to_directory_listings');
 
 Configuration
 No additional configuration required: The plugin adds endorsement categories to the directory listings automatically upon activation.
