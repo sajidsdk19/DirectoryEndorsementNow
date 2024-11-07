@@ -24,7 +24,7 @@ function update_endorsement() {
     $voteChange = intval($_POST['voteChange']);
     $ip_address = $_SERVER['REMOTE_ADDR'];
     
-    error_log("Category: $category, Listing ID: $listing_id, Vote Change: $voteChange, IP: $ip_address");
+   // error_log("Category: $category, Listing ID: $listing_id, Vote Change: $voteChange, IP: $ip_address");
 
     $user_votes = get_transient('endorsement_votes_' . $ip_address);
     if (!$user_votes) {
@@ -306,7 +306,6 @@ function wpmax_endorsements_add_admin_menu() {
         20
     );
 }
-
 
 //work on the functionality of endorse on dashboard side . 
 function wpmax_endorsements_dashboard_page() {
