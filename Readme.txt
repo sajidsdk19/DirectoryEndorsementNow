@@ -11,6 +11,7 @@ Endorsement Categories: Includes predefined categories such as Coaching, Facilit
 User Voting: Allows users to vote for listings in specific categories.
 AJAX Handling: Utilizes AJAX for smooth and interactive voting experiences.
 Vote Tracking: Tracks votes to prevent multiple votes from the same user for the same category.
+See How many votes have been voted by users on dasboard only by ADMIN . 
 
 
 Installation
